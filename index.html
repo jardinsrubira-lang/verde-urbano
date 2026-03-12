@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Verde Urbano">
+<meta name="theme-color" content="#1a2e1a">
+<title>Verde Urbano</title>
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { height:100%; overflow:hidden; }
+body {
+  height:100%; overflow:hidden;
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  background:#0f1a0f;
+  color:#f0ede6;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* ── CSS VARIABLES ── */
+:root {
+  --bg: #0f1a0f;
+  --surface: #1a2a1a;
+  --surface2: #223322;
+  --surface3: #2a3d2a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --green: #5aad4e;
+  --green-light: #7dc96f;
+  --green-muted: #3d6e35;
+  --amber: #d4a32a;
+  --red: #c04a35;
+  --text: #f0ede6;
+  --text2: #a8b5a0;
+  --text3: #6a7a64;
+  --safe-top: env(safe-area-inset-top, 44px);
+  --safe-bot: env(safe-area-inset-bottom, 34px);
+  --tab-h: calc(60px + var(--safe-bot));
+  --header-h: calc(56px + var(--safe-top));
+}
+
+/* ── LAYOUT ── */
+#app { height:100vh; height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ── HEADER ── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: var(--safe-top) 20px 0;
+  height: var(--header-h);
+  display:flex; align-items:flex-end; justify-content:space-between;
+  padding-bottom: 10px;
+  flex-shrink:0;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position:relative; z-index:10;
+}
+
+.header-left { display:flex; flex-direction:column; gap:2px; }
+.header-logo { font-size:18px; font-weight:700; color:var(--text); letter-spacing:-0.3px; }
+.header-logo span { color:var(--green); }
+.header-subtitle { font-size:11px; color:var(--text3); letter-spacing:0.3px; }
+.header-right { display:flex; gap:10px; align-items:center; }
+
+.header-btn {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--surface2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; cursor:pointer;
+  transition: background 0.15s;
+}
+.header-btn:active { background:var(--surface3); }
+
+/* ── SCROLL AREA ── */
+.scroll-area {
+  flex:1; overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:20px;
+}
+
+/* ── TAB BAR ── */
+.tabbar {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  height: var(--tab-h);
+  display:grid; grid-template-columns: repeat(4, 1fr);
+  flex-shrink:0;
+  padding-bottom: var(--safe-bot);
+}
+
+.tab {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:3px;
+  cursor:pointer; padding-top:6px;
+  transition: opacity 0.15s;
+  position:relative;
+}
+.tab:active { opacity:0.6; }
+
+.tab-icon { font-size:22px; line-height:1; }
+.tab-label { font-size:9px; font-weight:500; color:var(--text3); letter-spacing:0.3px; text-transform:uppercase; }
+.tab.active .tab-label { color:var(--green); }
+.tab.active .tab-icon { filter: none; }
+
+.tab-dot {
+  position:absolute; top:4px; right:calc(50% - 14px);
+  width:7px; height:7px; border-radius:50%;
+  background:var(--red); border:1.5px solid var(--surface);
+  display:none;
+}
+.tab-dot.show { display:block; }
+
+/* ── PAGES ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ── SECTION HEADERS ── */
+.section-pad { padding:20px 16px 0; }
+
+.page-title {
+  font-size:26px; font-weight:700; color:var(--text);
+  letter-spacing:-0.5px; margin-bottom:4px;
+}
+.page-sub { font-size:13px; color:var(--text3); }
+
+/* ── CARDS ── */
+.card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  margin:0 16px 12px;
+}
+.card-header {
+  padding:14px 16px 10px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.card-title { font-size:13px; font-weight:600; color:var(--text2); letter-spacing:0.3px; text-transform:uppercase; }
+.card-body { padding:0; }
+
+/* ── HOME / DASHBOARD ── */
+.dashboard-hero {
+  margin:16px 16px 0;
+  background: linear-gradient(135deg, var(--green-muted) 0%, #2d5a27 100%);
+  border-radius:20px;
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+}
+.dashboard-hero::before {
+  content:'🌿';
+  position:absolute; right:-10px; top:-10px;
+  font-size:80px; opacity:0.15;
+  transform:rotate(-20deg);
+}
+.hero-date { font-size:11px; color:rgba(255,255,255,0.6); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+.hero-greeting { font-size:22px; font-weight:700; color:#fff; margin-bottom:4px; }
+.hero-stats { font-size:13px; color:rgba(255,255,255,0.75); }
+
+.stats-row {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:10px; margin:16px 16px 0;
+}
+.stat-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:14px 12px;
+  display:flex; flex-direction:column; gap:4px;
+}
+.stat-num { font-size:26px; font-weight:700; color:var(--text); line-height:1; }
+.stat-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; }
+.stat-green { border-bottom:3px solid var(--green); }
+.stat-amber { border-bottom:3px solid var(--amber); }
+.stat-red { border-bottom:3px solid var(--red); }
+
+/* VISIT ITEMS */
+.visit-item {
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+  cursor:pointer; transition:background 0.1s;
+}
+.visit-item:last-child { border-bottom:none; }
+.visit-item:active { background:var(--surface2); }
+
+.visit-avatar {
+  width:42px; height:42px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0;
+}
+.va-green { background:rgba(90,173,78,0.15); }
+.va-amber { background:rgba(212,163,42,0.15); }
+.va-red { background:rgba(192,74,53,0.15); }
+
+.visit-info { flex:1; min-width:0; }
+.visit-name { font-size:15px; font-weight:600; color:var(--text); margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.visit-detail { font-size:12px; color:var(--text3); }
+
+.visit-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
+.visit-time { font-size:11px; color:var(--text3); }
+.status-pill {
+  font-size:10px; font-weight:600; padding:3px 8px; border-radius:20px;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+.sp-green { background:rgba(90,173,78,0.15); color:var(--green); }
+.sp-amber { background:rgba(212,163,42,0.15); color:var(--amber); }
+.sp-red { background:rgba(192,74,53,0.15); color:var(--red); }
+.sp-gray { background:rgba(168,181,160,0.1); color:var(--text3); }
+
+/* ── AGENDA ── */
+.week-strip {
+  display:flex; gap:6px;
+  padding:16px 16px 0;
+  overflow-x:auto; scrollbar-width:none;
+}
+.week-strip::-webkit-scrollbar { display:none; }
+
+.day-chip {
+  display:flex; flex-direction:column; align-items:center;
+  gap:4px; padding:8px 10px; border-radius:12px;
+  border:1px solid var(--border); cursor:pointer;
+  flex-shrink:0; min-width:46px;
+  transition:all 0.15s;
+}
+.day-chip.today { background:var(--green); border-color:var(--green); }
+.day-chip.has-visit { border-color:var(--green-muted); }
+.day-name { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text3); }
+.day-num { font-size:18px; font-weight:700; color:var(--text); }
+.day-dot { width:5px; height:5px; border-radius:50%; background:var(--green); margin-top:2px; }
+.day-chip.today .day-name, .day-chip.today .day-num { color:#fff; }
+
+.agenda-item {
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex; gap:12px; align-items:flex-start;
+  cursor:pointer; transition:background 0.1s;
+}
+.agenda-item:active { background:var(--surface2); }
+.agenda-item:last-child { border-bottom:none; }
+
+.agenda-time-col { width:50px; flex-shrink:0; padding-top:2px; }
+.agenda-time { font-size:12px; font-weight:600; color:var(--green); }
+.agenda-freq { font-size:10px; color:var(--text3); margin-top:2px; text-transform:uppercase; letter-spacing:0.5px; }
+
+.agenda-line {
+  width:2px; background:var(--green-muted); border-radius:2px; flex-shrink:0;
+  margin-top:4px; align-self:stretch;
+}
+.agenda-info { flex:1; }
+.agenda-client { font-size:15px; font-weight:600; color:var(--text); margin-bottom:3px; }
+.agenda-tasks { font-size:12px; color:var(--text3); line-height:1.5; }
+.agenda-tags { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+.atag {
+  font-size:10px; padding:2px 8px; border-radius:20px;
+  background:var(--surface2); color:var(--text3); border:1px solid var(--border);
+}
+
+/* ── CHECKLIST ── */
+.checklist-nav {
+  display:flex; gap:8px; padding:16px 16px 0;
+  overflow-x:auto; scrollbar-width:none;
+}
+.checklist-nav::-webkit-scrollbar { display:none; }
+.freq-chip {
+  padding:7px 14px; border-radius:20px;
+  border:1px solid var(--border);
+  font-size:12px; font-weight:600; color:var(--text3);
+  cursor:pointer; white-space:nowrap; flex-shrink:0;
+  transition:all 0.15s;
+}
+.freq-chip.active { background:var(--green); border-color:var(--green); color:#fff; }
+
+.checklist-header {
+  padding:16px 16px 8px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.cl-title { font-size:17px; font-weight:700; color:var(--text); }
+.cl-progress { font-size:12px; color:var(--text3); }
+
+.progress-bar {
+  margin:0 16px 16px;
+  height:4px; background:var(--surface2); border-radius:2px; overflow:hidden;
+}
+.progress-fill {
+  height:100%; background:var(--green); border-radius:2px;
+  transition:width 0.4s ease;
+}
+
+.check-group { margin-bottom:4px; }
+.check-group-label {
+  font-size:10px; font-weight:700; color:var(--text3);
+  text-transform:uppercase; letter-spacing:1px;
+  padding:10px 16px 4px;
+}
+
+.check-item {
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:flex-start; gap:12px;
+  cursor:pointer; transition:background 0.1s;
+}
+.check-item:active { background:var(--surface2); }
+.check-item.done { opacity:0.5; }
+.check-item:last-child { border-bottom:none; }
+
+.check-box {
+  width:22px; height:22px; border-radius:7px;
+  border:2px solid var(--border2); flex-shrink:0; margin-top:1px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s; font-size:13px;
+}
+.check-item.done .check-box { background:var(--green); border-color:var(--green); }
+
+.check-text { flex:1; }
+.check-title { font-size:15px; color:var(--text); margin-bottom:2px; line-height:1.3; }
+.check-item.done .check-title { text-decoration:line-through; color:var(--text3); }
+.check-sub { font-size:12px; color:var(--text3); line-height:1.4; }
+.check-warn {
+  margin-top:5px; padding:6px 9px;
+  background:rgba(192,74,53,0.1); border-radius:8px;
+  font-size:11px; color:#e06050; display:flex; gap:5px;
+}
+.check-tip {
+  margin-top:5px; padding:6px 9px;
+  background:rgba(90,173,78,0.1); border-radius:8px;
+  font-size:11px; color:var(--green-light); display:flex; gap:5px;
+}
+.check-impact {
+  font-size:9px; font-weight:700; padding:2px 6px; border-radius:6px;
+  text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; display:inline-block;
+}
+.ci-low { background:rgba(90,173,78,0.12); color:var(--green); }
+.ci-med { background:rgba(212,163,42,0.12); color:var(--amber); }
+.ci-high { background:rgba(192,74,53,0.12); color:var(--red); }
+
+.checklist-actions {
+  margin:16px; display:flex; gap:10px;
+}
+.btn-primary {
+  flex:1; padding:14px; border-radius:13px;
+  background:var(--green); color:#fff;
+  font-size:15px; font-weight:700; text-align:center;
+  cursor:pointer; border:none; transition:opacity 0.15s;
+}
+.btn-primary:active { opacity:0.8; }
+.btn-secondary {
+  padding:14px 18px; border-radius:13px;
+  background:var(--surface2); color:var(--text2);
+  font-size:15px; font-weight:600; text-align:center;
+  cursor:pointer; border:1px solid var(--border);
+}
+
+/* ── CLIENTES ── */
+.search-bar {
+  margin:16px 16px 0;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:12px 14px;
+  display:flex; align-items:center; gap:10px;
+  color:var(--text3); font-size:15px;
+}
+.search-bar span { flex:1; }
+
+.client-item {
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+  cursor:pointer; transition:background 0.1s;
+}
+.client-item:active { background:var(--surface2); }
+.client-item:last-child { border-bottom:none; }
+
+.client-avatar {
+  width:46px; height:46px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0; background:var(--surface2);
+}
+
+.client-info { flex:1; min-width:0; }
+.client-name { font-size:15px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.client-meta { font-size:12px; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.client-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.client-plants { font-size:12px; color:var(--text3); }
+
+.plants-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:10px; margin:0 16px;
+}
+.plant-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:14px;
+  cursor:pointer; transition:all 0.15s;
+}
+.plant-card:active { background:var(--surface2); }
+.plant-icon { font-size:28px; margin-bottom:8px; }
+.plant-name { font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.plant-location { font-size:11px; color:var(--text3); margin-bottom:8px; }
+.plant-status-row { display:flex; align-items:center; gap:6px; }
+.status-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.sd-green { background:var(--green); }
+.sd-amber { background:var(--amber); }
+.sd-red { background:var(--red); }
+.plant-last { font-size:10px; color:var(--text3); }
+
+/* ── MODAL / DETAIL OVERLAY ── */
+.overlay {
+  position:fixed; inset:0; z-index:100;
+  background:rgba(0,0,0,0.7);
+  display:none; align-items:flex-end;
+  backdrop-filter:blur(4px);
+}
+.overlay.open { display:flex; }
+
+.sheet {
+  background:var(--surface);
+  border-radius:24px 24px 0 0;
+  width:100%; max-height:88vh;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+  padding-bottom: var(--safe-bot);
+  animation: slideUp 0.3s cubic-bezier(0.32,0.72,0,1);
+}
+
+@keyframes slideUp {
+  from { transform:translateY(100%); }
+  to { transform:translateY(0); }
+}
+
+.sheet-handle {
+  width:36px; height:4px; border-radius:2px;
+  background:var(--border2); margin:12px auto 0;
+}
+.sheet-header {
+  padding:16px 20px 0;
+  display:flex; align-items:flex-start; justify-content:space-between;
+}
+.sheet-title { font-size:20px; font-weight:700; color:var(--text); }
+.sheet-close {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--surface2); display:flex;
+  align-items:center; justify-content:center;
+  font-size:16px; cursor:pointer; color:var(--text3);
+}
+.sheet-body { padding:16px 20px; }
+
+/* REPORT FORM */
+.form-group { margin-bottom:16px; }
+.form-label { font-size:12px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:block; }
+.form-input {
+  width:100%; background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; padding:13px 14px; font-size:15px;
+  color:var(--text); outline:none; font-family:inherit;
+  transition:border-color 0.2s;
+}
+.form-input:focus { border-color:var(--green); }
+.form-textarea { resize:none; min-height:80px; }
+select.form-input { -webkit-appearance:none; }
+
+.status-selector { display:flex; gap:8px; }
+.status-opt {
+  flex:1; padding:11px 8px; border-radius:12px;
+  border:2px solid var(--border); text-align:center;
+  font-size:13px; font-weight:600; cursor:pointer;
+  transition:all 0.15s;
+}
+.status-opt.sel-green { background:rgba(90,173,78,0.2); border-color:var(--green); color:var(--green); }
+.status-opt.sel-amber { background:rgba(212,163,42,0.2); border-color:var(--amber); color:var(--amber); }
+.status-opt.sel-red { background:rgba(192,74,53,0.2); border-color:var(--red); color:var(--red); }
+
+.photo-area {
+  border:2px dashed var(--border2); border-radius:14px;
+  padding:24px; text-align:center; cursor:pointer;
+  transition:all 0.15s;
+}
+.photo-area:active { background:var(--surface2); }
+.photo-icon { font-size:32px; margin-bottom:6px; }
+.photo-text { font-size:13px; color:var(--text3); }
+.photo-hint { font-size:11px; color:var(--text3); opacity:0.6; margin-top:3px; }
+
+/* ── ADD BUTTON ── */
+.fab {
+  position:fixed; bottom:calc(var(--tab-h) + 16px); right:20px;
+  width:54px; height:54px; border-radius:50%;
+  background:var(--green); box-shadow:0 4px 20px rgba(90,173,78,0.4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; cursor:pointer; z-index:50;
+  transition:transform 0.15s;
+}
+.fab:active { transform:scale(0.92); }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:calc(var(--tab-h) + 16px); left:50%;
+  transform:translateX(-50%) translateY(0);
+  background:#1a3a1a; border:1px solid var(--green);
+  color:var(--green-light); font-size:13px; font-weight:500;
+  padding:10px 18px; border-radius:24px;
+  z-index:200; opacity:0; transition:opacity 0.3s;
+  white-space:nowrap; pointer-events:none;
+}
+.toast.show { opacity:1; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  text-align:center; padding:48px 24px;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.empty-icon { font-size:48px; opacity:0.5; }
+.empty-text { font-size:15px; color:var(--text3); }
+
+/* ── NOTIF BADGE ── */
+.notif-badge {
+  position:absolute; top:-2px; right:-2px;
+  min-width:16px; height:16px; border-radius:8px;
+  background:var(--red); color:#fff;
+  font-size:9px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  padding:0 3px; border:2px solid var(--bg);
+}
+
+/* ── SCROLLBAR ── */
+.scroll-area::-webkit-scrollbar { width:3px; }
+.scroll-area::-webkit-scrollbar-track { background:transparent; }
+.scroll-area::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:2px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo">Verde<span>Urbano</span></div>
+      <div class="header-subtitle" id="headerSub">Carregando...</div>
+    </div>
+    <div class="header-right">
+      <div class="header-btn" onclick="openNotif()">
+        🔔
+        <div class="notif-badge" id="notifBadge">3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div class="scroll-area" id="scrollArea">
+
+    <!-- ══ PAGE: HOME ══ -->
+    <div class="page active" id="page-home">
+      <div class="dashboard-hero">
+        <div class="hero-date" id="heroDate"></div>
+        <div class="hero-greeting" id="heroGreeting"></div>
+        <div class="hero-stats" id="heroStats"></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card stat-green">
+          <div class="stat-num" id="statClients">0</div>
+          <div class="stat-label">Clientes</div>
+        </div>
+        <div class="stat-card stat-amber">
+          <div class="stat-num" id="statToday">0</div>
+          <div class="stat-label">Hoje</div>
+        </div>
+        <div class="stat-card stat-red">
+          <div class="stat-num" id="statAlerts">0</div>
+          <div class="stat-label">Alertas</div>
+        </div>
+      </div>
+
+      <div style="height:16px"></div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Próximas Visitas</div>
+          <div style="font-size:12px;color:var(--green);cursor:pointer" onclick="goTab('agenda')">Ver todas →</div>
+        </div>
+        <div class="card-body" id="homeVisits"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Alertas Ativos 🔴</div>
+        </div>
+        <div class="card-body" id="homeAlerts"></div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: AGENDA ══ -->
+    <div class="page" id="page-agenda">
+      <div class="section-pad">
+        <div class="page-title">Agenda</div>
+        <div class="page-sub">Visitas programadas</div>
+      </div>
+      <div class="week-strip" id="weekStrip"></div>
+      <div style="height:16px"></div>
+      <div class="card">
+        <div class="card-body" id="agendaList"></div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: CHECKLIST ══ -->
+    <div class="page" id="page-check">
+      <div class="section-pad">
+        <div class="page-title">Checklist</div>
+        <div class="page-sub">Protocolo de manutenção</div>
+      </div>
+      <div class="checklist-nav">
+        <div class="freq-chip active" onclick="switchFreq('semanal',this)">🌿 Semanal</div>
+        <div class="freq-chip" onclick="switchFreq('quinzenal',this)">✂️ Quinzenal</div>
+        <div class="freq-chip" onclick="switchFreq('mensal',this)">🔬 Mensal</div>
+        <div class="freq-chip" onclick="switchFreq('semestral',this)">🌱 Semestral</div>
+      </div>
+      <div class="checklist-header">
+        <div class="cl-title" id="clTitle">Visita Semanal</div>
+        <div class="cl-progress" id="clProgress">0 / 0</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="card" style="margin-top:0">
+        <div class="card-body" id="checklistBody"></div>
+      </div>
+      <div class="checklist-actions">
+        <div class="btn-primary" onclick="openReport()">📋 Registrar Visita</div>
+        <div class="btn-secondary" onclick="resetChecklist()">↺</div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: CLIENTES ══ -->
+    <div class="page" id="page-clients">
+      <div class="section-pad">
+        <div class="page-title">Clientes</div>
+        <div class="page-sub" id="clientCount">0 clientes ativos</div>
+      </div>
+      <div class="search-bar">
+        <span>🔍</span>
+        <span style="color:var(--text3)">Buscar cliente...</span>
+      </div>
+      <div style="height:16px"></div>
+      <div class="card">
+        <div class="card-body" id="clientList"></div>
+      </div>
+    </div>
+
+  </div><!-- /scroll-area -->
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <div class="tab active" id="tab-home" onclick="goTab('home')">
+      <div class="tab-icon">🏠</div>
+      <div class="tab-label">Início</div>
+    </div>
+    <div class="tab" id="tab-agenda" onclick="goTab('agenda')">
+      <div class="tab-icon">📅</div>
+      <div class="tab-label">Agenda</div>
+      <div class="tab-dot show" id="tdot-agenda"></div>
+    </div>
+    <div class="tab" id="tab-check" onclick="goTab('check')">
+      <div class="tab-icon">✅</div>
+      <div class="tab-label">Checklist</div>
+    </div>
+    <div class="tab" id="tab-clients" onclick="goTab('clients')">
+      <div class="tab-icon">🌿</div>
+      <div class="tab-label">Clientes</div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- FAB -->
+<div class="fab" id="fab" onclick="openAddSheet()">＋</div>
+
+<!-- OVERLAYS -->
+<!-- Notificações -->
+<div class="overlay" id="overlayNotif" onclick="closeOverlay('overlayNotif')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Notificações</div>
+      <div class="sheet-close" onclick="closeOverlay('overlayNotif')">✕</div>
+    </div>
+    <div class="sheet-body" id="notifBody"></div>
+  </div>
+</div>
+
+<!-- Relatório de Visita -->
+<div class="overlay" id="overlayReport" onclick="closeOverlay('overlayReport')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Registrar Visita</div>
+      <div class="sheet-close" onclick="closeOverlay('overlayReport')">✕</div>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">Cliente</label>
+        <select class="form-input" id="reportClient">
+          <option>Clínica São Lucas</option>
+          <option>Escritório Barra Tech</option>
+          <option>Restaurante Botafogo</option>
+          <option>Consultório Dra. Ana</option>
+          <option>Coworking Centro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Frequência desta visita</label>
+        <select class="form-input">
+          <option>Semanal</option>
+          <option>Quinzenal</option>
+          <option>Mensal</option>
+          <option>Semestral</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status Geral das Plantas</label>
+        <div class="status-selector">
+          <div class="status-opt" onclick="selStatus(this,'green')">🟢 Saudável</div>
+          <div class="status-opt" onclick="selStatus(this,'amber')">🟡 Atenção</div>
+          <div class="status-opt" onclick="selStatus(this,'red')">🔴 Urgente</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea class="form-input form-textarea" placeholder="Descreva o estado das plantas, ações tomadas, alertas para próxima visita..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Foto da visita</label>
+        <div class="photo-area" onclick="simulatePhoto()">
+          <div class="photo-icon" id="photoIcon">📷</div>
+          <div class="photo-text" id="photoText">Tirar foto</div>
+          <div class="photo-hint">Antes/depois das plantas</div>
+        </div>
+      </div>
+      <div class="btn-primary" onclick="saveReport()">Salvar Visita</div>
+    </div>
+  </div>
+</div>
+
+<!-- Adicionar Cliente -->
+<div class="overlay" id="overlayAdd" onclick="closeOverlay('overlayAdd')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Novo Cliente</div>
+      <div class="sheet-close" onclick="closeOverlay('overlayAdd')">✕</div>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">Nome do Estabelecimento</label>
+        <input class="form-input" type="text" placeholder="Ex: Clínica São Lucas" id="newClientName">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-input" id="newClientType">
+          <option>🏥 Consultório / Clínica</option>
+          <option>🏢 Escritório / Coworking</option>
+          <option>🛍️ Varejo / Restaurante</option>
+          <option>🏪 Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bairro</label>
+        <input class="form-input" type="text" placeholder="Ex: Botafogo" id="newClientBairro">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Frequência de Manutenção</label>
+        <select class="form-input" id="newClientFreq">
+          <option>Semanal</option>
+          <option>Quinzenal</option>
+          <option>Mensal</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nº de Plantas</label>
+        <input class="form-input" type="number" placeholder="Ex: 8" id="newClientPlants" min="1">
+      </div>
+      <div class="btn-primary" onclick="saveNewClient()">Adicionar Cliente</div>
+    </div>
+  </div>
+</div>
+
+<!-- Cliente Detalhe -->
+<div class="overlay" id="overlayClient" onclick="closeOverlay('overlayClient')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="clientDetailTitle">Cliente</div>
+      <div class="sheet-close" onclick="closeOverlay('overlayClient')">✕</div>
+    </div>
+    <div class="sheet-body" id="clientDetailBody"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const STORAGE_KEY = 'verde_urbano_v1';
+
+const defaultData = {
+  clients: [
+    { id:1, name:'Clínica São Lucas', type:'🏥', bairro:'Botafogo', freq:'Semanal', plants:12, status:'green', lastVisit:'2025-03-10', nextVisit:'2025-03-17', contact:'(21) 98765-4321', notes:'Evitar defensivos com odor. Acesso somente entre pacientes.' },
+    { id:2, name:'Escritório Barra Tech', type:'🏢', bairro:'Barra da Tijuca', freq:'Quinzenal', plants:20, status:'amber', lastVisit:'2025-03-05', nextVisit:'2025-03-19', contact:'(21) 91234-5678', notes:'Evitar horário de reunião 9h–11h. Jardim vertical na entrada.' },
+    { id:3, name:'Restaurante Sabor Carioca', type:'🛍️', bairro:'Botafogo', freq:'Semanal', plants:8, status:'red', lastVisit:'2025-03-08', nextVisit:'2025-03-15', contact:'(21) 99876-5432', notes:'Trabalhar antes das 11h. Cochonilha detectada na última visita.' },
+    { id:4, name:'Consultório Dra. Ana', type:'🏥', bairro:'Ipanema', freq:'Quinzenal', plants:6, status:'green', lastVisit:'2025-03-07', nextVisit:'2025-03-21', contact:'(21) 97654-3210', notes:'Somente espécies sem perfume. Acesso pelo corredor lateral.' },
+    { id:5, name:'Coworking Centro RJ', type:'🏢', bairro:'Centro', freq:'Mensal', plants:35, status:'green', lastVisit:'2025-03-01', nextVisit:'2025-04-01', contact:'(21) 93456-7890', notes:'Falar com Carla (gestora). Manutenção mensal no primeiro dia.' },
+  ],
+  plants: [
+    { id:1, clientId:1, name:'Zamioculca', location:'Recepção', icon:'🌿', status:'green', lastCare:'2025-03-10' },
+    { id:2, clientId:1, name:'Sansevieria', location:'Sala de espera', icon:'🌱', status:'green', lastCare:'2025-03-10' },
+    { id:3, clientId:2, name:'Monstera', location:'Entrada', icon:'🍃', status:'amber', lastCare:'2025-03-05' },
+    { id:4, clientId:2, name:'Jardim Vertical', location:'Parede hall', icon:'🌾', status:'amber', lastCare:'2025-03-05' },
+    { id:5, clientId:3, name:'Ficus benjamina', location:'Vitrine', icon:'🌳', status:'red', lastCare:'2025-03-08' },
+    { id:6, clientId:3, name:'Bromélias', location:'Balcão', icon:'🌺', status:'amber', lastCare:'2025-03-08' },
+  ],
+  visits: [],
+  notifications: [
+    { id:1, type:'alert', text:'Cochonilha detectada no Restaurante Sabor Carioca — ação urgente', time:'Há 2 horas', read:false },
+    { id:2, type:'reminder', text:'Visita na Clínica São Lucas amanhã às 08:00', time:'Há 3 horas', read:false },
+    { id:3, type:'tip', text:'Semana de calor intenso no RJ — aumentar frequência de rega', time:'Há 5 horas', read:false },
+  ]
+};
+
+let DATA = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || defaultData;
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); }
+
+// ── CHECKLISTS ──────────────────────────────────────────
+const CHECKLISTS = {
+  semanal: {
+    title: 'Visita Semanal',
+    groups: [
+      { label:'Chegada', items:[
+        { id:'s1', title:'Confirmar chegada ao responsável', sub:'Identificar-se e verificar restrições de área', impact:'low' },
+        { id:'s2', title:'Posicionar material de trabalho', sub:'Bag em local discreto, fora do fluxo de clientes', impact:'low' },
+        { id:'s3', title:'Estender lonas de proteção', sub:'Sob e ao redor de todos os vasos que receberão água', impact:'low', warn:'Piso molhado causa acidentes — sinalize!' },
+      ]},
+      { label:'Rega', items:[
+        { id:'s4', title:'Testar umidade do substrato', sub:'Dedo até 3–4cm — úmido: não regar / seco: regar', impact:'low', tip:'Use medidor de umidade para agilizar' },
+        { id:'s5', title:'Executar rega calibrada', sub:'Pelo bordo interno do vaso, nunca sobre as folhas', impact:'low' },
+        { id:'s6', title:'Esvaziar pratos acumulando água', sub:'Água parada >24h causa podridão radicular', impact:'low', warn:'Principal causa de morte de plantas internas' },
+      ]},
+      { label:'Limpeza', items:[
+        { id:'s7', title:'Limpar folhas grandes com microfibra', sub:'Folhas lisas: Monstera, Ficus, Aglaonema, Dracena', impact:'low', tip:'Pano levemente úmido — nunca encharcado' },
+        { id:'s8', title:'Inspecionar verso das folhas para pragas', sub:'Cochonilha-algodão, ácaro-vermelho — atenção redobrada no verão', impact:'low' },
+        { id:'s9', title:'Remover folhas secas/amareladas', sub:'Rotação suave na base. Folhas parciais: tesoura desinfetada', impact:'low' },
+      ]},
+      { label:'Encerramento', items:[
+        { id:'s10', title:'Ajustar posição dos vasos para luz', sub:'Girar 90° se hastes curvando para um lado', impact:'low' },
+        { id:'s11', title:'Recolher lonas e limpar respingos', sub:'Pano de microfibra em piso, móveis e equipamentos', impact:'low' },
+        { id:'s12', title:'Comunicar status ao responsável', sub:'2–3 frases: o que foi feito, alertas se houver', impact:'low' },
+      ]},
+    ]
+  },
+  quinzenal: {
+    title: 'Visita Quinzenal',
+    groups: [
+      { label:'Todas as atividades semanais +', items:[
+        { id:'q1', title:'Executar todas as etapas da visita semanal', sub:'S-01 a S-12 do protocolo semanal', impact:'low' },
+      ]},
+      { label:'Poda de Formação', items:[
+        { id:'q2', title:'Fotografar estado atual de cada planta', sub:'Antes de qualquer corte — para relatório', impact:'low' },
+        { id:'q3', title:'Desinfetar tesoura com álcool 70%', sub:'Entre cada planta diferente — sem exceção', impact:'high', warn:'Ferramenta contaminada pode matar planta em 2–3 semanas' },
+        { id:'q4', title:'Podar acima do nó, ângulo 45°', sub:'0,5–1cm acima do nó, inclinado para longe', impact:'med', tip:'45° drena água para fora da planta' },
+        { id:'q5', title:'Recolher resíduos em tempo real', sub:'Folhas e galhos direto no saco — nunca no chão', impact:'low' },
+      ]},
+      { label:'Adubação Foliar', items:[
+        { id:'q6', title:'Verificar ventilação do ambiente', sub:'Abrir janelas antes de pulverizar', impact:'high', warn:'Consultórios: NUNCA pulverizar com pacientes presentes' },
+        { id:'q7', title:'Aplicar fertilizante foliar diluído', sub:'NPK 10-10-10, 5ml/L — verso e face das folhas', impact:'med', tip:'Melhor horário no RJ: antes das 9h ou após 17h' },
+      ]},
+      { label:'Checagem de Vasos', items:[
+        { id:'q8', title:'Verificar drenagem dos vasos', sub:'Desentupir drenos com espátula se necessário', impact:'low' },
+        { id:'q9', title:'Limpar cachepôs por fora', sub:'Pano úmido para remover calcário e terra', impact:'low' },
+        { id:'q10', title:'Atualizar mapa de plantas do cliente', sub:'Notas sobre posição, estado e substituições', impact:'low' },
+      ]},
+    ]
+  },
+  mensal: {
+    title: 'Visita Mensal',
+    groups: [
+      { label:'Todas as atividades quinzenais +', items:[
+        { id:'m1', title:'Executar protocolo quinzenal completo', sub:'Q-01 a Q-10 + Semanal', impact:'low' },
+      ]},
+      { label:'Adubação no Substrato', items:[
+        { id:'m2', title:'Soltar camada superficial do substrato', sub:'Espátula, 1–2cm, movimento circular suave', impact:'low' },
+        { id:'m3', title:'Aplicar fertilizante granulado (Osmocote)', sub:'1 colher de café por litro de substrato', impact:'med', tip:'No verão carioca: reduzir dose em 20%' },
+        { id:'m4', title:'Cobrir e regar para ativar nutrientes', sub:'0,5cm de substrato por cima + rega normal', impact:'low' },
+      ]},
+      { label:'Defensivos Preventivos', items:[
+        { id:'m5', title:'Confirmar horário sem pessoas no ambiente', sub:'48h de aviso prévio ao cliente', impact:'high', warn:'Ar-condicionado DESLIGADO durante aplicação' },
+        { id:'m6', title:'Calçar EPI completo (máscara PFF2, luvas, avental)', sub:'Mesmo para produtos orgânicos como Neem', impact:'high', warn:'Nenhuma aplicação sem EPI — sem exceção' },
+        { id:'m7', title:'Pulverizar todas as plantas sistematicamente', sub:'Foco no verso das folhas, axilas e substrato', impact:'med', tip:'Neem em outubro previne surto no verão carioca' },
+        { id:'m8', title:'Ventilar 30min e sinalizar área', sub:'Aviso "defensivo aplicado" por 1 hora', impact:'med' },
+      ]},
+      { label:'Relatório e Reunião', items:[
+        { id:'m9', title:'Fotografar todas as plantas (ângulo padrão)', sub:'Mesma distância e ângulo todo mês', impact:'low' },
+        { id:'m10', title:'Compilar relatório mensal (PDF)', sub:'Antes/depois, serviços, alertas, recomendações', impact:'low' },
+        { id:'m11', title:'Reunião breve com o responsável (10 min)', sub:'3 pontos: bem, monitorando, sugestão de melhoria', impact:'low', tip:'Esse momento constrói a renovação do contrato' },
+        { id:'m12', title:'Coletar NPS informal do cliente', sub:'"De 0 a 10, como está satisfeito?"', impact:'low' },
+      ]},
+    ]
+  },
+  semestral: {
+    title: 'Visita Semestral',
+    groups: [
+      { label:'Preparação Prévia', items:[
+        { id:'se1', title:'Agendar com 1–2 semanas de antecedência', sub:'Confirmar área de trabalho isolada no local', impact:'high' },
+        { id:'se2', title:'Separar material completo', sub:'Substrato, argila, vasos, carvão, telas', impact:'med' },
+        { id:'se3', title:'Quarentena de novas plantas (5–7 dias)', sub:'Observar antes de levar ao cliente', impact:'high', warn:'Plantas novas não quarentenadas = risco de praga' },
+      ]},
+      { label:'Replantio Completo', items:[
+        { id:'se4', title:'Montar bancada provisória isolada', sub:'Fora do fluxo principal — copa, corredor, externo', impact:'high' },
+        { id:'se5', title:'Transportar plantas em lotes (3–5 por vez)', sub:'Sinalizar pontos esvaziados com placa de manutenção', impact:'med' },
+        { id:'se6', title:'Inspecionar e tratar raízes de cada planta', sub:'Brancas/firmes: saudáveis. Marrons/moles: cortar', impact:'high', warn:'Raízes podres: cortar com tesoura desinfetada' },
+        { id:'se7', title:'Replantar com substrato novo + argila + carvão', sub:'Dreno + tela + 2cm argila + substrato específico', impact:'med', tip:'Carvão ativado previne mofo no substrato' },
+        { id:'se8', title:'Limpeza completa antes da reunião', sub:'Bancada desmontada, piso limpo, plantas no lugar', impact:'high' },
+      ]},
+      { label:'Reunião Estratégica', items:[
+        { id:'se9', title:'Apresentar evolução semestral com fotos', sub:'Primeiro dia vs. hoje — impacto visual forte', impact:'low' },
+        { id:'se10', title:'Coletar NPS formal', sub:'Formulário — abaixo de 8: propor melhoria imediata', impact:'low', tip:'NPS 9–10: pedir indicação de novo cliente' },
+        { id:'se11', title:'Apresentar proposta de expansão', sub:'Novo ambiente, jardim vertical, espécies sazonais', impact:'low', tip:'70% dos clientes satisfeitos aceitam upsell' },
+        { id:'se12', title:'Confirmar renovação do contrato', sub:'Benefício por renovação antecipada', impact:'low' },
+      ]},
+    ]
+  }
+};
+
+let currentFreq = 'semanal';
+let checkedItems = JSON.parse(localStorage.getItem('verde_checks_' + currentFreq) || '{}');
+
+// ── NAVIGATION ──────────────────────────────────────────
+function goTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('scrollArea').scrollTop = 0;
+
+  const subs = { home:'Visão geral', agenda:'Visitas programadas', check:'Protocolo de campo', clients:'Seus clientes' };
+  document.getElementById('headerSub').textContent = subs[tab];
+
+  if (tab === 'check') renderChecklist();
+  if (tab === 'clients') renderClients();
+}
+
+// ── DATES ──────────────────────────────────────────────
+function formatDate(d) {
+  const days = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]}`;
+}
+
+function shortDay(d) {
+  return ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()];
+}
+
+// ── HOME ──────────────────────────────────────────────
+function renderHome() {
+  const now = new Date();
+  document.getElementById('heroDate').textContent = formatDate(now);
+
+  const hour = now.getHours();
+  const greet = hour < 12 ? 'Bom dia! ☀️' : hour < 18 ? 'Boa tarde! 🌤️' : 'Boa noite! 🌙';
+  document.getElementById('heroGreeting').textContent = greet;
+
+  const todayVisits = DATA.clients.filter(c => c.nextVisit === now.toISOString().split('T')[0]);
+  document.getElementById('heroStats').textContent = `${DATA.clients.length} clientes · ${todayVisits.length} visitas hoje`;
+
+  document.getElementById('statClients').textContent = DATA.clients.length;
+  document.getElementById('statToday').textContent = todayVisits.length;
+  const alerts = DATA.clients.filter(c => c.status !== 'green').length;
+  document.getElementById('statAlerts').textContent = alerts;
+
+  // Próximas visitas
+  const sorted = [...DATA.clients].sort((a,b) => new Date(a.nextVisit) - new Date(b.nextVisit)).slice(0,4);
+  document.getElementById('homeVisits').innerHTML = sorted.map(c => visitItemHTML(c)).join('');
+
+  // Alertas
+  const alertClients = DATA.clients.filter(c => c.status !== 'green');
+  document.getElementById('homeAlerts').innerHTML = alertClients.length
+    ? alertClients.map(c => `
+      <div class="visit-item" onclick="openClientDetail(${c.id})">
+        <div class="visit-avatar va-${c.status}">${c.type}</div>
+        <div class="visit-info">
+          <div class="visit-name">${c.name}</div>
+          <div class="visit-detail">${c.bairro} · ${c.freq}</div>
+        </div>
+        <div class="status-pill sp-${c.status}">${c.status === 'amber' ? 'Atenção' : 'Urgente'}</div>
+      </div>`).join('')
+    : '<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Tudo saudável</div></div>';
+}
+
+function visitItemHTML(c) {
+  const next = new Date(c.nextVisit + 'T08:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((new Date(c.nextVisit) - today) / 86400000);
+  const when = diff === 0 ? 'Hoje' : diff === 1 ? 'Amanhã' : `em ${diff}d`;
+  return `<div class="visit-item" onclick="openClientDetail(${c.id})">
+    <div class="visit-avatar va-${c.status}">${c.type}</div>
+    <div class="visit-info">
+      <div class="visit-name">${c.name}</div>
+      <div class="visit-detail">${c.bairro} · ${c.freq} · ${c.plants} plantas</div>
+    </div>
+    <div class="visit-right">
+      <div class="visit-time">${when}</div>
+      <div class="status-pill sp-${c.status}">${c.status === 'green' ? 'OK' : c.status === 'amber' ? 'Atenção' : 'Urgente'}</div>
+    </div>
+  </div>`;
+}
+
+// ── AGENDA ──────────────────────────────────────────────
+function renderAgenda() {
+  const today = new Date();
+  const strip = document.getElementById('weekStrip');
+  strip.innerHTML = '';
+  for (let i = -1; i <= 6; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const isToday = i === 0;
+    const hasVisit = DATA.clients.some(c => c.nextVisit === d.toISOString().split('T')[0]);
+    strip.innerHTML += `<div class="day-chip ${isToday ? 'today' : ''} ${hasVisit && !isToday ? 'has-visit' : ''}">
+      <div class="day-name">${shortDay(d)}</div>
+      <div class="day-num">${d.getDate()}</div>
+      ${hasVisit ? '<div class="day-dot"></div>' : ''}
+    </div>`;
+  }
+
+  const sorted = [...DATA.clients].sort((a,b) => new Date(a.nextVisit) - new Date(b.nextVisit));
+  document.getElementById('agendaList').innerHTML = sorted.map(c => {
+    const d = new Date(c.nextVisit + 'T00:00:00');
+    const today2 = new Date(); today2.setHours(0,0,0,0);
+    const diff = Math.round((d - today2) / 86400000);
+    const dayStr = diff === 0 ? 'Hoje' : diff === 1 ? 'Amanhã' : formatDate(d);
+    const freqTasks = {
+      'Semanal': 'Rega, limpeza foliar, remoção de secas',
+      'Quinzenal': 'Semanal + Poda, adubação foliar',
+      'Mensal': 'Quinzenal + Adubação substrato, defensivos, relatório',
+    };
+    const tasks = freqTasks[c.freq] || c.freq;
+    return `<div class="agenda-item" onclick="openClientDetail(${c.id})">
+      <div class="agenda-time-col">
+        <div class="agenda-time">08:00</div>
+        <div class="agenda-freq">${c.freq}</div>
+      </div>
+      <div class="agenda-line"></div>
+      <div class="agenda-info">
+        <div class="agenda-client">${c.name}</div>
+        <div class="agenda-tasks">${dayStr} · ${c.bairro}</div>
+        <div class="agenda-tags">
+          <div class="atag">${c.plants} plantas</div>
+          <div class="atag">${tasks.split(',')[0].trim()}</div>
+          <div class="status-pill sp-${c.status}" style="font-size:10px;padding:2px 8px">${c.status === 'green' ? '🟢 OK' : c.status === 'amber' ? '🟡 Atenção' : '🔴 Urgente'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHECKLIST ──────────────────────────────────────────
+function switchFreq(freq, el) {
+  document.querySelectorAll('.freq-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentFreq = freq;
+  checkedItems = JSON.parse(localStorage.getItem('verde_checks_' + freq) || '{}');
+  renderChecklist();
+}
+
+function renderChecklist() {
+  const cl = CHECKLISTS[currentFreq];
+  document.getElementById('clTitle').textContent = cl.title;
+
+  const allItems = cl.groups.flatMap(g => g.items);
+  const total = allItems.length;
+  const done = allItems.filter(i => checkedItems[i.id]).length;
+
+  document.getElementById('clProgress').textContent = `${done} / ${total}`;
+  document.getElementById('progressFill').style.width = total ? `${(done/total)*100}%` : '0%';
+
+  document.getElementById('checklistBody').innerHTML = cl.groups.map(g => `
+    <div class="check-group">
+      <div class="check-group-label">${g.label}</div>
+      ${g.items.map(item => {
+        const isDone = checkedItems[item.id];
+        return `<div class="check-item ${isDone ? 'done' : ''}" id="ci-${item.id}" onclick="toggleCheck('${item.id}')">
+          <div class="check-box">${isDone ? '✓' : ''}</div>
+          <div class="check-text">
+            <div class="check-title">${item.title}</div>
+            <div class="check-sub">${item.sub}</div>
+            ${item.warn ? `<div class="check-warn">⚠️ ${item.warn}</div>` : ''}
+            ${item.tip ? `<div class="check-tip">💡 ${item.tip}</div>` : ''}
+            <span class="check-impact ci-${item.impact}">${item.impact === 'low' ? 'Baixo impacto' : item.impact === 'med' ? 'Médio impacto' : 'Alto — cuidado'}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function toggleCheck(id) {
+  checkedItems[id] = !checkedItems[id];
+  localStorage.setItem('verde_checks_' + currentFreq, JSON.stringify(checkedItems));
+  renderChecklist();
+  const allItems = CHECKLISTS[currentFreq].groups.flatMap(g => g.items);
+  const total = allItems.length;
+  const done = allItems.filter(i => checkedItems[i.id]).length;
+  if (done === total) showToast('✅ Checklist completo!');
+}
+
+function resetChecklist() {
+  checkedItems = {};
+  localStorage.setItem('verde_checks_' + currentFreq, '{}');
+  renderChecklist();
+  showToast('↺ Checklist reiniciado');
+}
+
+// ── CLIENTS ──────────────────────────────────────────
+function renderClients() {
+  document.getElementById('clientCount').textContent = `${DATA.clients.length} clientes ativos`;
+  document.getElementById('clientList').innerHTML = DATA.clients.map(c => `
+    <div class="client-item" onclick="openClientDetail(${c.id})">
+      <div class="client-avatar">${c.type}</div>
+      <div class="client-info">
+        <div class="client-name">${c.name}</div>
+        <div class="client-meta">${c.bairro} · ${c.freq} · Próxima: ${fmtDate(c.nextVisit)}</div>
+      </div>
+      <div class="client-right">
+        <div class="status-pill sp-${c.status}">${c.status === 'green' ? '🟢' : c.status === 'amber' ? '🟡' : '🔴'}</div>
+        <div class="client-plants">🌿 ${c.plants}</div>
+      </div>
+    </div>`).join('');
+}
+
+function fmtDate(str) {
+  if (!str) return '—';
+  const [y,m,d] = str.split('-');
+  return `${d}/${m}`;
+}
+
+// ── CLIENT DETAIL ──────────────────────────────────────
+function openClientDetail(id) {
+  const c = DATA.clients.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('clientDetailTitle').textContent = c.name;
+  const clientPlants = DATA.plants.filter(p => p.clientId === id);
+  document.getElementById('clientDetailBody').innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <div class="status-pill sp-${c.status}" style="font-size:12px;padding:5px 12px">${c.status === 'green' ? '🟢 Saudável' : c.status === 'amber' ? '🟡 Atenção' : '🔴 Urgente'}</div>
+      <div class="atag" style="font-size:12px;padding:5px 12px">${c.freq}</div>
+      <div class="atag" style="font-size:12px;padding:5px 12px">🌿 ${c.plants} plantas</div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">📍 Localização</div>
+      <div style="font-size:14px;color:var(--text2)">${c.bairro}, Rio de Janeiro</div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">📞 Contato</div>
+      <div style="font-size:14px;color:var(--green)">${c.contact}</div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">📅 Última visita / Próxima</div>
+      <div style="font-size:14px;color:var(--text2)">${fmtDate(c.lastVisit)} → ${fmtDate(c.nextVisit)}</div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">⚠️ Observações Importantes</div>
+      <div style="font-size:13px;color:var(--text3);background:var(--surface2);padding:12px;border-radius:10px;line-height:1.6">${c.notes}</div>
+    </div>
+    ${clientPlants.length ? `
+    <div class="form-label">Plantas Cadastradas</div>
+    <div class="plants-grid">
+      ${clientPlants.map(p => `
+        <div class="plant-card">
+          <div class="plant-icon">${p.icon}</div>
+          <div class="plant-name">${p.name}</div>
+          <div class="plant-location">${p.location}</div>
+          <div class="plant-status-row">
+            <div class="status-dot sd-${p.status}"></div>
+            <div class="plant-last">Últ: ${fmtDate(p.lastCare)}</div>
+          </div>
+        </div>`).join('')}
+    </div>` : ''}
+    <div style="height:12px"></div>
+    <div class="btn-primary" onclick="closeOverlay('overlayClient');openReport()">📋 Registrar Visita</div>
+  `;
+  openOverlay('overlayClient');
+}
+
+// ── NOTIFICATIONS ──────────────────────────────────────
+function openNotif() {
+  document.getElementById('notifBody').innerHTML = DATA.notifications.map(n => `
+    <div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start">
+      <div style="font-size:20px">${n.type === 'alert' ? '🔴' : n.type === 'reminder' ? '📅' : '💡'}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;color:var(--text);margin-bottom:3px;line-height:1.4">${n.text}</div>
+        <div style="font-size:11px;color:var(--text3)">${n.time}</div>
+      </div>
+    </div>`).join('');
+  openOverlay('overlayNotif');
+}
+
+// ── REPORT ──────────────────────────────────────────────
+function openReport() { openOverlay('overlayReport'); }
+
+function selStatus(el, type) {
+  document.querySelectorAll('.status-opt').forEach(o => o.className = 'status-opt');
+  el.classList.add('sel-' + type);
+}
+
+let photoTaken = false;
+function simulatePhoto() {
+  photoTaken = true;
+  document.getElementById('photoIcon').textContent = '✅';
+  document.getElementById('photoText').textContent = 'Foto registrada';
+  showToast('📷 Foto adicionada ao relatório');
+}
+
+function saveReport() {
+  const client = document.getElementById('reportClient').value;
+  const today = new Date().toISOString().split('T')[0];
+  DATA.visits.push({ client, date: today, checklist: currentFreq, photoTaken });
+  save();
+  closeOverlay('overlayReport');
+  photoTaken = false;
+  document.getElementById('photoIcon').textContent = '📷';
+  document.getElementById('photoText').textContent = 'Tirar foto';
+  showToast('✅ Visita registrada com sucesso!');
+}
+
+// ── ADD CLIENT ──────────────────────────────────────────
+function openAddSheet() {
+  const tab = document.querySelector('.tab.active').id.replace('tab-','');
+  if (tab === 'clients') { openOverlay('overlayAdd'); return; }
+  openOverlay('overlayAdd');
+}
+
+function saveNewClient() {
+  const name = document.getElementById('newClientName').value.trim();
+  if (!name) { showToast('⚠️ Informe o nome do cliente'); return; }
+  const typeMap = { '🏥 Consultório / Clínica':'🏥', '🏢 Escritório / Coworking':'🏢', '🛍️ Varejo / Restaurante':'🛍️', '🏪 Outro':'🏪' };
+  const typeStr = document.getElementById('newClientType').value;
+  const today = new Date();
+  const nextVisit = new Date(today); nextVisit.setDate(today.getDate() + 7);
+  DATA.clients.push({
+    id: Date.now(),
+    name,
+    type: typeMap[typeStr] || '🌿',
+    bairro: document.getElementById('newClientBairro').value || 'Rio de Janeiro',
+    freq: document.getElementById('newClientFreq').value,
+    plants: parseInt(document.getElementById('newClientPlants').value) || 0,
+    status: 'green',
+    lastVisit: today.toISOString().split('T')[0],
+    nextVisit: nextVisit.toISOString().split('T')[0],
+    contact: '',
+    notes: 'Cliente adicionado recentemente.'
+  });
+  save();
+  closeOverlay('overlayAdd');
+  document.getElementById('newClientName').value = '';
+  document.getElementById('newClientBairro').value = '';
+  document.getElementById('newClientPlants').value = '';
+  renderHome();
+  renderClients();
+  showToast('🌿 Cliente adicionado!');
+}
+
+// ── OVERLAYS ──────────────────────────────────────────
+function openOverlay(id) { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── TOAST ──────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────
+function init() {
+  const now = new Date();
+  document.getElementById('headerSub').textContent = 'Visão geral';
+  renderHome();
+  renderAgenda();
+  renderChecklist();
+  renderClients();
+}
+
+init();
+
+// ── SERVICE WORKER (OFFLINE) ────────────────────────────
+const SW_CODE = `
+const CACHE = 'verde-urbano-v1';
+const SELF_URL = self.location.href;
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.add(SELF_URL)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(resp => {
+        if (resp && resp.status === 200) {
+          const clone = resp.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return resp;
+      }).catch(() => caches.match(SELF_URL));
+    })
+  );
+});
+`;
+
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  const blob = new Blob([SW_CODE], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl, { scope: './' })
+    .then(reg => {
+      console.log('[Verde Urbano] SW registrado, offline ativo ✅');
+      reg.update();
+    })
+    .catch(err => console.warn('[Verde Urbano] SW falhou:', err));
+}
+
+// ── iOS HOME SCREEN INSTALL PROMPT ──────────────────────
+window.addEventListener('load', () => {
+  registerSW();
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandalone = window.navigator.standalone;
+
+  if (isIOS && !isInStandalone && !sessionStorage.getItem('installDismissed')) {
+    setTimeout(() => {
+      const banner = document.createElement('div');
+      banner.style.cssText = `
+        position:fixed; bottom:calc(var(--tab-h) + 10px); left:16px; right:16px;
+        background:#1a3a1a; border:1px solid var(--green);
+        border-radius:16px; padding:16px;
+        z-index:300; color:var(--text2);
+        display:flex; gap:10px; align-items:flex-start;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        animation: slideUp 0.4s cubic-bezier(0.32,0.72,0,1);
+      `;
+      banner.innerHTML = `
+        <div style="font-size:26px;flex-shrink:0;line-height:1">📲</div>
+        <div style="flex:1">
+          <div style="font-weight:700;color:var(--text);margin-bottom:5px;font-size:14px">Instalar & usar offline</div>
+          <div style="font-size:12px;line-height:1.6;color:var(--text3)">
+            1️⃣ Toque em <strong style="color:var(--green)">Compartilhar ↑</strong> na barra do Safari<br>
+            2️⃣ Selecione <strong style="color:var(--green)">Adicionar à Tela de Início</strong><br>
+            3️⃣ Toque em <strong style="color:var(--green)">Adicionar</strong> — pronto! 🌿
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text3);background:var(--surface2);padding:6px 10px;border-radius:8px">
+            ✅ Funciona offline após instalado
+          </div>
+        </div>
+        <div style="font-size:20px;cursor:pointer;color:var(--text3);flex-shrink:0;padding:2px"
+          onclick="this.parentElement.remove();sessionStorage.setItem('installDismissed','1')">✕</div>
+      `;
+      document.body.appendChild(banner);
+    }, 2000);
+  }
+
+  // Indica status offline/online na interface
+  function updateOnlineStatus() {
+    if (!navigator.onLine) showToast('📵 Modo offline — dados salvos localmente');
+  }
+  window.addEventListener('offline', updateOnlineStatus);
+});
+</script>
+</body>
+</html>
